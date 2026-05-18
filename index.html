@@ -146,9 +146,17 @@ input:focus,select:focus{border-color:var(--accent)}
       <div class="countdown-lbl">Primer partido: 11 jun 2026 · 5:00 PM Colombia</div>
     </div>
     <div id="locked-reg" class="lock-banner" style="display:none">🔒 El torneo ya inició. No se aceptan nuevos participantes.</div>
+
+    <!-- PASO 1 -->
     <div id="reg-form">
-      <div class="card">
-        <div class="card-title">Datos de registro</div>
+      <div class="card" style="border-color:rgba(200,241,53,0.3)">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+          <div style="width:32px;height:32px;border-radius:50%;background:var(--accent);color:var(--accent-text);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:18px;flex-shrink:0">1</div>
+          <div>
+            <div style="font-size:14px;font-weight:600;color:var(--accent)">¿Es tu primera vez?</div>
+            <div style="font-size:12px;color:var(--text2)">Completa el formulario para participar</div>
+          </div>
+        </div>
         <label>Nombre completo <span style="color:var(--red)">*</span></label>
         <input type="text" id="inp-nombre" placeholder="Ej: Juan Carlos Pérez">
         <label>Celular <span style="color:var(--red)">*</span></label>
@@ -170,8 +178,16 @@ input:focus,select:focus{border-color:var(--accent)}
         <button class="btn" id="btn-registrar">REGISTRARME</button>
       </div>
     </div>
-    <div class="card" style="margin-top:4px">
-      <div class="card-title">¿Ya tienes código de acceso?</div>
+
+    <!-- PASO 2 -->
+    <div class="card" style="margin-top:4px;border-color:rgba(96,165,250,0.3)">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <div style="width:32px;height:32px;border-radius:50%;background:#60a5fa;color:#0d0d0d;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:18px;flex-shrink:0">2</div>
+        <div>
+          <div style="font-size:14px;font-weight:600;color:#60a5fa">¿Ya estás registrado?</div>
+          <div style="font-size:12px;color:var(--text2)">Ingresa con el código que te enviaron por WhatsApp</div>
+        </div>
+      </div>
       <label>Celular</label>
       <div style="display:flex;gap:8px;margin-bottom:12px">
         <div style="display:flex;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:4px;flex-shrink:0">
@@ -188,8 +204,9 @@ input:focus,select:focus{border-color:var(--accent)}
       <label>Código de acceso (enviado por WhatsApp)</label>
       <input type="text" id="inp-codigo" placeholder="Ej: 4829" maxlength="6" style="letter-spacing:4px;font-size:20px;text-align:center">
       <div id="login-alert" class="alert alert-red" style="display:none"></div>
-      <button class="btn-ghost" id="btn-login" style="margin-top:4px">INGRESAR CON CÓDIGO</button>
+      <button class="btn-ghost" id="btn-login" style="margin-top:4px;border-color:rgba(96,165,250,0.4);color:#60a5fa">INGRESAR CON CÓDIGO</button>
     </div>
+
     <div class="card">
       <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
         <span>Participantes</span><span id="count-badge" class="badge badge-accent">0/100</span>
@@ -279,7 +296,7 @@ input:focus,select:focus{border-color:var(--accent)}
       </div>
       <div class="card">
         <div class="card-title">Plan B — Respaldo Excel</div>
-        <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Si la app falla, descarga este Excel con todos los pronósticos. Tiene 4 hojas: Pronósticos, Resultados (para ingresar manualmente), Posiciones e Instrucciones.</p>
+        <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Si la app falla, descarga este Excel con todos los pronósticos. Tiene 4 hojas: Pronósticos, Resultados, Posiciones e Instrucciones.</p>
         <button class="btn-ghost" id="btn-plan-b" style="border-color:rgba(74,222,128,0.3);color:var(--success)">📊 Descargar Excel Plan B</button>
       </div>
       <div class="card">
@@ -905,11 +922,19 @@ document.getElementById("btn-toggle-lock").addEventListener("click",async()=>{
   if(newLocked&&Object.keys(state.participants).length>0)setTimeout(()=>pdfPronosticos(),400);
 });
 document.getElementById("btn-logout").addEventListener("click",()=>{adminLogged=false;renderAdmin();});
+
 document.getElementById("btn-reset-confirm").addEventListener("click",async()=>{
-  if(!confirm("¿Borrar TODO? Esta acción no se puede deshacer."))return;
+  if(!confirm("⚠️ ¿Borrar TODO? Participantes, pronósticos y resultados. Esta acción NO se puede deshacer."))return;
+  const pinConfirm=prompt("Por seguridad, ingresa el PIN de administrador para confirmar:");
+  if(pinConfirm!==ADMIN_PIN){
+    alert("PIN incorrecto. Reinicio cancelado.");
+    return;
+  }
   currentPid=null;
   await db.ref("polla").set({locked:false,participants:{},pronosticos:{},resultados:{},timestamps:{},codigos:{}});
+  alert("✅ Todo reiniciado correctamente.");
 });
+
 document.getElementById("btn-pdf-pos").addEventListener("click",pdfPosiciones);
 document.getElementById("btn-pdf-prons").addEventListener("click",pdfPronosticos);
 document.getElementById("btn-plan-b").addEventListener("click",generarExcelPlanB);
@@ -928,8 +953,6 @@ function generarExcelPlanB(){
 function construirExcel(){
   const wb=XLSX.utils.book_new();
   const ranked=getRanked();
-
-  // HOJA 1: PRONÓSTICOS
   const h1=[["#","Fecha","Hora COL","Grupo","Local","Visitante",...ranked.map(p=>p.apodo||p.nombre)]];
   MATCHES.forEach((m,i)=>{
     const row=[i+1,m.f,m.hr,"Grupo "+m.g,m.h,m.a];
@@ -943,7 +966,6 @@ function construirExcel(){
   ws1["!cols"]=[{wch:4},{wch:13},{wch:10},{wch:8},{wch:18},{wch:18},...ranked.map(()=>({wch:14}))];
   XLSX.utils.book_append_sheet(wb,ws1,"Pronósticos");
 
-  // HOJA 2: RESULTADOS (para ingresar manualmente)
   const h2=[
     ["#","Fecha","Hora COL","Grupo","Local","Visitante","RESULTADO — escribe el equipo ganador o Empate"],
     ["","","","","","","↑ Escribe el nombre EXACTO del equipo ganador, o la palabra Empate"]
@@ -957,7 +979,6 @@ function construirExcel(){
   ws2["!cols"]=[{wch:4},{wch:13},{wch:10},{wch:8},{wch:18},{wch:18},{wch:42}];
   XLSX.utils.book_append_sheet(wb,ws2,"Resultados");
 
-  // HOJA 3: POSICIONES
   const h3=[["Posición","Participante","Nombre real","Celular","Puntos","% Acierto"]];
   ranked.forEach((p,i)=>{
     const pct=MATCHES.length>0?(p.pts/MATCHES.length*100).toFixed(1)+"%":"0%";
@@ -984,7 +1005,6 @@ function construirExcel(){
   ws3["!cols"]=[{wch:10},{wch:13},{wch:28},...ranked.map(()=>({wch:16}))];
   XLSX.utils.book_append_sheet(wb,ws3,"Posiciones");
 
-  // HOJA 4: INSTRUCCIONES
   const h4=[
     ["LA GRAN POLLA MUNDIALISTA DE GUS — PLAN B"],
     ["Generado: "+new Date().toLocaleString("es-CO")],
@@ -1004,13 +1024,12 @@ function construirExcel(){
     ["","✗ = pronóstico incorrecto (0 puntos)"],
     ["","— = el participante no ingresó pronóstico"],
     [],
-    ["⚠️ Nota importante:","Este Excel es independiente de la app. Los resultados aquí NO se sincronizan con Firebase."],
+    ["⚠️ Nota:","Este Excel es independiente de la app. Los datos NO se sincronizan con Firebase."],
     ["","Si la app funciona, úsala. Este archivo es el plan de respaldo."],
   ];
   const ws4=XLSX.utils.aoa_to_sheet(h4);
   ws4["!cols"]=[{wch:22},{wch:75}];
   XLSX.utils.book_append_sheet(wb,ws4,"Instrucciones");
-
   XLSX.writeFile(wb,"PlanB_PollaMundialista_"+new Date().toISOString().slice(0,10)+".xlsx");
 }
 </script>
