@@ -95,7 +95,7 @@ input:focus,select:focus{border-color:var(--accent)}
 .btn-sig:active{background:var(--border2)}
 .btn-sig.accent{background:var(--accent);color:var(--accent-text);border-color:var(--accent)}
 .result-row{display:flex;gap:6px}
-.rb{flex:1;padding:9px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:13px;font-weight:600;cursor:pointer}
+.rb{flex:1;padding:9px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:12px;font-weight:600;cursor:pointer}
 .rb.active-l{background:var(--success-dim);border-color:rgba(74,222,128,0.3);color:var(--success)}
 .rb.active-x{background:var(--warn-dim);border-color:rgba(250,204,21,0.3);color:var(--warn)}
 .rb.active-2{background:rgba(96,165,250,0.12);border-color:rgba(96,165,250,0.3);color:#60a5fa}
@@ -117,9 +117,9 @@ input:focus,select:focus{border-color:var(--accent)}
 .code-item:last-child{border-bottom:none}
 .code-num{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--accent);letter-spacing:2px}
 .btn-wa{padding:6px 12px;background:rgba(37,211,102,0.15);color:#25d366;border:1px solid rgba(37,211,102,0.3);border-radius:var(--r);font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-block}
-.instructivo{background:var(--accent-dim);border:1px solid rgba(200,241,53,0.2);border-radius:var(--r-lg);padding:14px;margin-bottom:14px}
-.instructivo-title{font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--accent);margin-bottom:8px}
-.instructivo-item{font-size:13px;color:var(--text);line-height:1.6;display:flex;gap:8px;align-items:flex-start;margin-bottom:4px}
+.pais-btn,.pais-btn-login{font-size:18px;padding:4px 6px;border:none;background:transparent;border-radius:6px;cursor:pointer;opacity:0.4;transition:opacity 0.15s,background 0.15s}
+.pais-btn.active,.pais-btn-login.active{opacity:1;background:var(--accent-dim)}
+.pais-btn:hover,.pais-btn-login:hover{opacity:0.8}
 #loading-screen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999}
 .loading-logo{font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--accent);letter-spacing:2px;text-align:center;line-height:1.2}
 .loading-sub{color:var(--text2);font-size:13px;margin-top:8px}
@@ -152,7 +152,18 @@ input:focus,select:focus{border-color:var(--accent)}
         <label>Nombre completo <span style="color:var(--red)">*</span></label>
         <input type="text" id="inp-nombre" placeholder="Ej: Juan Carlos Pérez">
         <label>Celular <span style="color:var(--red)">*</span></label>
-        <input type="tel" id="inp-celular" placeholder="Ej: 300 123 4567" inputmode="tel">
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <div style="display:flex;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:4px;flex-shrink:0">
+            <button type="button" class="pais-btn active" data-code="57" onclick="selPais(this)">🇨🇴</button>
+            <button type="button" class="pais-btn" data-code="1" onclick="selPais(this)">🇺🇸</button>
+            <button type="button" class="pais-btn" data-code="34" onclick="selPais(this)">🇪🇸</button>
+            <button type="button" class="pais-btn" data-code="56" onclick="selPais(this)">🇨🇱</button>
+          </div>
+          <div style="flex:1;position:relative">
+            <span id="pais-prefix" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text2);font-size:14px;pointer-events:none">+57</span>
+            <input type="tel" id="inp-celular" placeholder="300 123 4567" inputmode="tel" style="width:100%;padding:12px 14px 12px 46px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;outline:none;-webkit-appearance:none;margin-bottom:0">
+          </div>
+        </div>
         <label>Apodo <span style="color:var(--text3)">(obligatorio si juegas doble polla con el mismo celular)</span></label>
         <input type="text" id="inp-apodo" placeholder="Ej: El Pibe, Juancho...">
         <div id="reg-alert" class="alert alert-red" style="display:none"></div>
@@ -162,7 +173,18 @@ input:focus,select:focus{border-color:var(--accent)}
     <div class="card" style="margin-top:4px">
       <div class="card-title">¿Ya tienes código de acceso?</div>
       <label>Celular</label>
-      <input type="tel" id="inp-login-cel" placeholder="Tu número de celular" inputmode="tel">
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <div style="display:flex;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:4px;flex-shrink:0">
+          <button type="button" class="pais-btn-login active" data-code="57" onclick="selPaisLogin(this)">🇨🇴</button>
+          <button type="button" class="pais-btn-login" data-code="1" onclick="selPaisLogin(this)">🇺🇸</button>
+          <button type="button" class="pais-btn-login" data-code="34" onclick="selPaisLogin(this)">🇪🇸</button>
+          <button type="button" class="pais-btn-login" data-code="56" onclick="selPaisLogin(this)">🇨🇱</button>
+        </div>
+        <div style="flex:1;position:relative">
+          <span id="login-prefix" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text2);font-size:14px;pointer-events:none">+57</span>
+          <input type="tel" id="inp-login-cel" placeholder="300 123 4567" inputmode="tel" style="width:100%;padding:12px 14px 12px 46px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;outline:none;-webkit-appearance:none;margin-bottom:0">
+        </div>
+      </div>
       <label>Código de acceso (enviado por WhatsApp)</label>
       <input type="text" id="inp-codigo" placeholder="Ej: 4829" maxlength="6" style="letter-spacing:4px;font-size:20px;text-align:center">
       <div id="login-alert" class="alert alert-red" style="display:none"></div>
@@ -179,13 +201,15 @@ input:focus,select:focus{border-color:var(--accent)}
   <div class="section" id="sec-pronosticos">
     <div class="page-hero">Pronósticos</div>
     <div class="page-sub" id="pron-subtitle">Selecciona tus pronósticos 👇</div>
-    <div class="instructivo">
-      <div class="instructivo-title">📋 ¿Cómo funciona?</div>
-      <div class="instructivo-item"><span>⚽</span><span>Toca el <strong>nombre del equipo</strong> que crees que ganará cada partido.</span></div>
-      <div class="instructivo-item"><span>🤝</span><span>Si crees que terminarán empatados, toca <strong>"Empate"</strong>.</span></div>
-      <div class="instructivo-item"><span>✅</span><span><strong>1 punto</strong> por cada pronóstico correcto. 0 si fallas.</span></div>
-      <div class="instructivo-item"><span>🔒</span><span>Completa los <strong>72 partidos</strong> antes del cierre.</span></div>
-      <div class="instructivo-item"><span>🏆</span><span>Gana quien más aciertos tenga al final de la fase de grupos.</span></div>
+    <div class="card" style="background:var(--accent-dim);border-color:rgba(200,241,53,0.2);margin-bottom:14px">
+      <div style="font-size:13px;color:var(--text);line-height:1.6">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--accent);margin-bottom:6px">📋 ¿Cómo funciona?</div>
+        <div>⚽ Toca el <strong>nombre del equipo</strong> que crees que ganará cada partido.</div>
+        <div style="margin-top:4px">🤝 Si crees que terminarán empatados, toca <strong>"Empate"</strong>.</div>
+        <div style="margin-top:4px">✅ <strong>1 punto</strong> por cada pronóstico correcto. 0 si fallas.</div>
+        <div style="margin-top:4px">🔒 Completa los <strong>72 partidos</strong> antes del cierre.</div>
+        <div style="margin-top:4px">🏆 Gana quien más aciertos tenga al final de la fase de grupos.</div>
+      </div>
     </div>
     <div id="no-session-msg" class="alert alert-warn">Regístrate o ingresa con tu código para ver tus pronósticos.</div>
     <div id="pron-main" style="display:none">
@@ -374,7 +398,23 @@ firebase.initializeApp(firebaseConfig);
 const db=firebase.database();
 
 let state={participants:{},pronosticos:{},resultados:{},timestamps:{},codigos:{},locked:false};
-let adminLogged=false,activeGroup="A",adminGroup="A",publicoGroup="A",currentPid=null;
+let adminLogged=false;
+let activeGroup="A",adminGroup="A",publicoGroup="A";
+let currentPid=null;
+let paisCode="57",paisCodeLogin="57";
+
+function selPais(btn){
+  document.querySelectorAll(".pais-btn").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+  paisCode=btn.dataset.code;
+  document.getElementById("pais-prefix").textContent="+"+paisCode;
+}
+function selPaisLogin(btn){
+  document.querySelectorAll(".pais-btn-login").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+  paisCodeLogin=btn.dataset.code;
+  document.getElementById("login-prefix").textContent="+"+paisCodeLogin;
+}
 
 db.ref("polla").on("value",snap=>{
   const d=snap.val()||{};
@@ -403,6 +443,7 @@ function participantList(){return Object.values(state.participants).sort((a,b)=>
 function fmtTs(ts){if(!ts)return "";return new Date(ts).toLocaleString("es-CO",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});}
 function genCode(){return String(Math.floor(1000+Math.random()*9000));}
 function limpiarCel(c){return c.replace(/\D/g,"");}
+function celCompleto(code,num){return code+limpiarCel(num);}
 function navGroup(current,dir,groups){
   const i=groups.indexOf(current);
   if(dir===1&&i<groups.length-1)return groups[i+1];
@@ -427,7 +468,7 @@ function renderRegistro(){
       <div class="p-info">
         <div class="p-name">${p.apodo||p.nombre}${esActual?' <span style="font-size:10px;color:var(--accent)">● tú</span>':''}</div>
         ${p.apodo?`<div class="p-sub">${p.nombre}</div>`:""}
-        ${adminLogged?`<div class="p-sub">📱 ${p.celular||"—"}</div>`:""}
+        ${adminLogged?`<div class="p-sub">📱 ${p.celular?"+"+p.celular:"—"}</div>`:""}
       </div>
       <div style="display:flex;align-items:center;gap:8px">
         <span class="badge badge-accent">${pts}pts</span>
@@ -466,7 +507,7 @@ function renderPronosticos(){
     return`<div class="match-card">
       <div class="match-header">
         <span class="match-fecha">${m.f}</span>
-        <span class="match-hora">${m.hr} COL · Grupo ${m.g}</span>
+        <span class="match-hora">${m.hr} COL · Gr.${m.g}</span>
       </div>
       <div class="match-teams">
         <div class="match-team">${m.h}</div>
@@ -505,7 +546,7 @@ function renderPublico(){
     return`<div class="match-card" style="margin-bottom:10px">
       <div class="match-header">
         <span class="match-fecha">${m.f}</span>
-        <span class="match-hora">${m.hr} COL · Grupo ${m.g}</span>
+        <span class="match-hora">${m.hr} COL · Gr.${m.g}</span>
       </div>
       <div class="match-teams" style="margin-bottom:6px">
         <div class="match-team">${m.h}</div>
@@ -581,11 +622,11 @@ function renderAdmin(){
       const cod=state.codigos[p.id]||"—";
       const cel=p.celular||"";
       const waText=encodeURIComponent("Hola "+(p.apodo||p.nombre)+"! Tu código para La Gran Polla Mundialista de Gus es: *"+cod+"* Ingrésalo en la app para activar tus pronósticos.");
-      const waLink=cel?"https://wa.me/57"+limpiarCel(cel)+"?text="+waText:"#";
+      const waLink=cel?"https://wa.me/"+limpiarCel(cel)+"?text="+waText:"#";
       return`<div class="code-item">
         <div>
           <div style="font-weight:500;font-size:13px">${p.apodo||p.nombre}</div>
-          <div style="font-size:11px;color:var(--text2)">📱 ${cel||"sin celular"}</div>
+          <div style="font-size:11px;color:var(--text2)">📱 ${cel?"+"+cel:"sin celular"}</div>
         </div>
         <div style="display:flex;align-items:center;gap:8px">
           <div class="code-num">${cod}</div>
@@ -604,7 +645,7 @@ function renderAdmin(){
     return`<div class="match-card">
       <div class="match-header">
         <span class="match-fecha">${m.f}</span>
-        <span class="match-hora">${m.hr} COL · Grupo ${m.g}</span>
+        <span class="match-hora">${m.hr} COL · Gr.${m.g}</span>
       </div>
       <div class="match-teams">
         <div class="match-team">${m.h}</div>
@@ -624,7 +665,6 @@ function renderAdmin(){
 function setGroup(g){activeGroup=g;renderPronosticos();}
 function setAdminGroup(g){adminGroup=g;renderAdmin();}
 function setPublicoGroup(g){publicoGroup=g;renderPublico();}
-
 async function generarCodigo(pid){await fbSet("codigos/"+pid,genCode());}
 
 async function setPron(mid,val){
@@ -687,7 +727,7 @@ function pdfPosiciones(){
     doc.text(i===0?"*** 1ro ***":String(i+1),16,y);
     doc.text(p.nombre.slice(0,35),28,y);
     doc.text((p.apodo||"-").slice(0,25),100,y);
-    doc.text((p.celular||"-").slice(0,18),145,y);
+    doc.text((p.celular?"+"+p.celular:"-").slice(0,18),145,y);
     doc.text(String(p.pts),185,y,{align:"right"});
     y+=7;
   });
@@ -704,7 +744,7 @@ function pdfPronosticos(){
   doc.setFontSize(7);doc.setFont("helvetica","normal");
   doc.text("Generado: "+new Date().toLocaleString("es-CO")+" | ?=Sin pronóstico  ✓=Acertó  ✗=Falló",148,18,{align:"center"});
   doc.setFontSize(6);doc.setFont("helvetica","bold");
-  doc.text("Fecha",14,25);doc.text("Partido",38,25);
+  doc.text("Hora",14,25);doc.text("Partido",32,25);
   ranked.forEach((p,i)=>doc.text((p.apodo||p.nombre).slice(0,7),tStart+i*colW,25));
   doc.line(14,27,290,27);
   let y=33;let lastFecha="";
@@ -712,7 +752,7 @@ function pdfPronosticos(){
     if(y>198){
       doc.addPage("landscape");y=15;
       doc.setFontSize(6);doc.setFont("helvetica","bold");
-      doc.text("Fecha",14,y);doc.text("Partido",38,y);
+      doc.text("Hora",14,y);doc.text("Partido",32,y);
       ranked.forEach((p,i)=>doc.text((p.apodo||p.nombre).slice(0,7),tStart+i*colW,y));
       doc.line(14,y+2,290,y+2);y+=8;
     }
@@ -724,13 +764,13 @@ function pdfPronosticos(){
     }
     doc.setFont("helvetica","normal");doc.setFontSize(6);
     doc.text(m.hr,14,y);
-    doc.text((m.h+" vs "+m.a).slice(0,30),38,y);
+    doc.text((m.h+" vs "+m.a).slice(0,35),32,y);
     const res=state.resultados[m.id];
     ranked.forEach((p,i)=>{
       const pron=(state.pronosticos[p.id]||{})[m.id];
       let label="?";
       if(pron){
-        if(res&&pron){label=pron===res?"✓":"✗";}
+        if(res){label=pron===res?"✓":"✗";}
         else{label=pron==="1"?m.h.slice(0,4):pron==="x"?"EMP":m.a.slice(0,4);}
       }
       doc.text(label,tStart+i*colW,y);
@@ -752,11 +792,12 @@ document.querySelectorAll(".nav-item").forEach(btn=>{
 document.getElementById("btn-registrar").addEventListener("click",async()=>{
   if(state.locked)return;
   const nombre=document.getElementById("inp-nombre").value.trim();
-  const celular=limpiarCel(document.getElementById("inp-celular").value.trim());
+  const celNumero=document.getElementById("inp-celular").value.trim();
+  const celular=celCompleto(paisCode,celNumero);
   const apodo=document.getElementById("inp-apodo").value.trim();
   const al=document.getElementById("reg-alert");
   if(!nombre){al.style.display="block";al.textContent="El nombre completo es obligatorio.";return;}
-  if(!celular||celular.length<7){al.style.display="block";al.textContent="El celular es obligatorio.";return;}
+  if(!celNumero||celNumero.replace(/\D/g,"").length<7){al.style.display="block";al.textContent="El celular es obligatorio.";return;}
   const list=participantList();
   if(list.length>=100){al.style.display="block";al.textContent="Ya hay 100 participantes.";return;}
   const mismoCel=list.filter(p=>limpiarCel(p.celular||"")===celular);
@@ -784,13 +825,14 @@ document.getElementById("btn-registrar").addEventListener("click",async()=>{
 });
 
 document.getElementById("btn-login").addEventListener("click",()=>{
-  const celular=limpiarCel(document.getElementById("inp-login-cel").value.trim());
+  const celNumero=document.getElementById("inp-login-cel").value.trim();
+  const celular=celCompleto(paisCodeLogin,celNumero);
   const codigo=document.getElementById("inp-codigo").value.trim();
   const al=document.getElementById("login-alert");
-  if(!celular||!codigo){al.style.display="block";al.textContent="Ingresa tu celular y el código.";return;}
+  if(!celNumero||!codigo){al.style.display="block";al.textContent="Ingresa tu celular y el código.";return;}
   const list=participantList();
   const candidatos=list.filter(p=>limpiarCel(p.celular||"")===celular);
-  if(!candidatos.length){al.style.display="block";al.textContent="No encontramos ese número. ¿Ya te registraste?";return;}
+  if(!candidatos.length){al.style.display="block";al.textContent="No encontramos ese número. Verifica el país seleccionado y tu número.";return;}
   const match=candidatos.find(p=>state.codigos[p.id]===codigo);
   if(!match){al.style.display="block";al.textContent="Código incorrecto. Revisa el mensaje que te enviaron.";return;}
   al.style.display="none";
