@@ -290,12 +290,12 @@ input:focus,select:focus{border-color:var(--accent)}
       </div>
       <div class="card">
         <div class="card-title">Plan B — Respaldo Excel</div>
-        <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Si la app falla, descarga este Excel con todos los pronósticos. Tiene 4 hojas: Pronósticos, Resultados, Posiciones e Instrucciones.</p>
+        <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Descarga manualmente el Excel de respaldo con todos los pronósticos.</p>
         <button class="btn-ghost" id="btn-plan-b" style="border-color:rgba(74,222,128,0.3);color:var(--success)">📊 Descargar Excel Plan B</button>
       </div>
       <div class="card">
         <div class="card-title">Códigos de acceso — enviar por WhatsApp</div>
-        <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Genera el código de cada participante y envíaselo por WhatsApp. Sin el código no pueden ingresar sus pronósticos.</p>
+        <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Genera el código de cada participante y envíaselo por WhatsApp.</p>
         <div id="admin-codigos"><p style="color:var(--text3);font-size:13px;text-align:center;padding:8px 0">Sin participantes aún.</p></div>
       </div>
       <div class="card">
@@ -318,7 +318,7 @@ input:focus,select:focus{border-color:var(--accent)}
   <button class="nav-item" data-sec="admin"><span class="nav-icon">🔐</span><span>Admin</span></button>
 </div>
 <script>
-const ADMIN_PIN="7975";
+const ADMIN_PIN="2026";
 const GROUPS=["A","B","C","D","E","F","G","H","I","J","K","L"];
 const MATCHES=[
   {id:1, g:"A",h:"México",         a:"Sudáfrica",      f:"Jue 11 Jun",hr:"14:00"},
@@ -716,66 +716,117 @@ function updateCountdown(){
 setInterval(updateCountdown,1000);
 updateCountdown();
 
-function pdfPronosticos(){
-  if(!currentPid){alert("Debes ingresar con tu código para descargar tus pronósticos.");return;}
-  const p=state.participants[currentPid];
+// ── PDF INDIVIDUAL (transparencia — sin resultados ni puntos) ──
+function pdfIndividual(pid){
+  const p=state.participants[pid];
   if(!p)return;
   const nombre=p.apodo||p.nombre;
   const doc=new jspdf.jsPDF();
-  doc.setFontSize(16);doc.setFont("helvetica","bold");
-  doc.text("La Gran Polla Mundialista de Gus",105,16,{align:"center"});
-  doc.setFontSize(11);doc.setFont("helvetica","normal");
-  doc.text("Pronósticos de: "+nombre,105,24,{align:"center"});
-  doc.setFontSize(8);
-  doc.text("Generado: "+new Date().toLocaleString("es-CO"),105,30,{align:"center"});
-  doc.line(14,34,196,34);
-  let y=42;
-  doc.setFont("helvetica","bold");doc.setFontSize(8);
-  doc.text("#",14,y);doc.text("Hora",22,y);doc.text("Partido",38,y);
-  doc.text("Tu pronóstico",120,y);doc.text("Resultado",155,y);doc.text("Pts",188,y);
-  doc.line(14,y+2,196,y+2);y+=8;
-  doc.setFont("helvetica","normal");doc.setFontSize(8);
-  let totalPts=0;let lastFecha="";let num=0;
+  doc.setFontSize(20);doc.setFont("helvetica","bold");
+  doc.text("La Gran Polla Mundialista de Gus",105,18,{align:"center"});
+  doc.setFontSize(15);doc.setFont("helvetica","normal");
+  doc.text("Participante: "+nombre,105,28,{align:"center"});
+  doc.setFontSize(10);
+  doc.text("Pronósticos al cierre — "+new Date().toLocaleString("es-CO"),105,36,{align:"center"});
+  doc.setFontSize(9);doc.setTextColor(120,120,120);
+  doc.text("Este documento certifica los pronósticos ingresados antes del inicio del torneo.",105,43,{align:"center"});
+  doc.setTextColor(0,0,0);
+  doc.line(14,47,196,47);
+  let y=57;
+  doc.setFont("helvetica","bold");doc.setFontSize(11);
+  doc.text("#",14,y);doc.text("Fecha / Hora",24,y);doc.text("Partido",72,y);doc.text("Pronóstico",152,y);
+  doc.line(14,y+3,196,y+3);y+=10;
+  let lastFecha="";let num=0;
   MATCHES.forEach(m=>{
     num++;
-    if(y>275){
+    if(y>272){
       doc.addPage();y=20;
-      doc.setFont("helvetica","bold");doc.setFontSize(8);
-      doc.text("#",14,y);doc.text("Hora",22,y);doc.text("Partido",38,y);
-      doc.text("Tu pronóstico",120,y);doc.text("Resultado",155,y);doc.text("Pts",188,y);
-      doc.line(14,y+2,196,y+2);y+=8;doc.setFont("helvetica","normal");
+      doc.setFont("helvetica","bold");doc.setFontSize(11);
+      doc.text("#",14,y);doc.text("Fecha / Hora",24,y);doc.text("Partido",72,y);doc.text("Pronóstico",152,y);
+      doc.line(14,y+3,196,y+3);y+=10;
     }
     if(m.f!==lastFecha){
-      if(lastFecha!=="")y+=1;
-      doc.setFont("helvetica","bold");doc.setFontSize(7);
-      doc.text(m.f,14,y);y+=5;
-      doc.setFont("helvetica","normal");doc.setFontSize(8);
-      lastFecha=m.f;
+      if(lastFecha!=="")y+=2;
+      doc.setFont("helvetica","bold");doc.setFontSize(9);
+      doc.setTextColor(100,100,100);doc.text("— "+m.f+" —",14,y);doc.setTextColor(0,0,0);
+      y+=6;lastFecha=m.f;
     }
-    const pron=(state.pronosticos[currentPid]||{})[m.id];
-    const res=state.resultados[m.id];
-    const pronLabel=pron==="1"?m.h:pron==="x"?"Empate":pron==="2"?m.a:"—";
-    const resLabel=res==="1"?m.h:res==="x"?"Empate":res==="2"?m.a:"Pendiente";
-    const correct=res&&pron&&pron===res;
-    const wrong=res&&pron&&pron!==res;
-    if(correct)totalPts++;
+    const pron=(state.pronosticos[pid]||{})[m.id];
+    const pronLabel=pron==="1"?m.h:pron==="x"?"Empate":pron==="2"?m.a:"SIN PRONÓSTICO";
+    doc.setFont("helvetica","normal");doc.setFontSize(10);
     doc.text(String(num),14,y);
-    doc.text(m.hr,22,y);
-    doc.text((m.h+" vs "+m.a).slice(0,28),38,y);
-    doc.text(pronLabel.slice(0,18),120,y);
-    doc.text(resLabel.slice(0,18),155,y);
-    if(correct){doc.setTextColor(74,222,128);doc.text("+1 ✓",188,y);doc.setTextColor(0,0,0);}
-    else if(wrong){doc.setTextColor(255,77,77);doc.text("0 ✗",188,y);doc.setTextColor(0,0,0);}
-    else{doc.text(res?"0":"—",188,y);}
-    y+=6;
+    doc.text(m.f+" "+m.hr,24,y);
+    doc.text((m.h+" vs "+m.a).slice(0,30),72,y);
+    doc.setFont("helvetica","bold");
+    if(!pron){doc.setTextColor(200,50,50);}
+    doc.text(pronLabel.slice(0,22),152,y);
+    doc.setTextColor(0,0,0);doc.setFont("helvetica","normal");
+    y+=8;
   });
-  y+=4;doc.line(14,y,196,y);y+=7;
-  doc.setFont("helvetica","bold");doc.setFontSize(11);
-  doc.text("TOTAL: "+totalPts+" puntos de "+MATCHES.length+" partidos",105,y,{align:"center"});
-  y+=7;doc.setFont("helvetica","normal");doc.setFontSize(9);
-  doc.text("Porcentaje de acierto: "+Math.round(totalPts/MATCHES.length*100)+"%",105,y,{align:"center"});
+  y+=6;doc.line(14,y,196,y);y+=7;
+  doc.setFont("helvetica","italic");doc.setFontSize(9);doc.setTextColor(100,100,100);
+  doc.text("Documento generado automáticamente al cerrar los pronósticos.",105,y,{align:"center"});
+  doc.text("Los pronósticos aquí registrados no pueden ser modificados.",105,y+5,{align:"center"});
+  doc.setTextColor(0,0,0);
   const safeName=nombre.replace(/[^a-zA-Z0-9]/g,"_");
-  doc.save("mis_pronosticos_"+safeName+".pdf");
+  doc.save("pronosticos_"+safeName+".pdf");
+}
+
+function pdfPronosticos(){
+  if(!currentPid){alert("Debes ingresar con tu código para descargar tus pronósticos.");return;}
+  pdfIndividual(currentPid);
+}
+
+// ── PDF GENERAL (todos los participantes) ──
+function pdfGeneral(){
+  const ranked=getRanked();
+  if(!ranked.length){alert("No hay participantes.");return;}
+  const doc=new jspdf.jsPDF("landscape");
+  doc.setFontSize(16);doc.setFont("helvetica","bold");
+  doc.text("La Gran Polla Mundialista de Gus — Pronósticos al Cierre",148,14,{align:"center"});
+  doc.setFontSize(9);doc.setFont("helvetica","normal");
+  doc.text("Generado: "+new Date().toLocaleString("es-CO")+" — Documento de transparencia",148,21,{align:"center"});
+  doc.setFontSize(8);doc.setTextColor(100,100,100);
+  doc.text("Este documento certifica los pronósticos de todos los participantes antes del inicio del torneo.",148,27,{align:"center"});
+  doc.setTextColor(0,0,0);
+  const colW=Math.min(20,Math.floor(215/Math.max(ranked.length,1)));
+  const tStart=72;
+  let y=36;
+  doc.setFont("helvetica","bold");doc.setFontSize(7);
+  doc.text("Hora",14,y);doc.text("Partido",30,y);
+  ranked.forEach((p,i)=>doc.text((p.apodo||p.nombre).slice(0,9),tStart+i*colW,y));
+  doc.line(14,y+2,295,y+2);y+=7;
+  let lastFecha="";
+  MATCHES.forEach(m=>{
+    if(y>200){
+      doc.addPage("landscape");y=15;
+      doc.setFont("helvetica","bold");doc.setFontSize(7);
+      doc.text("Hora",14,y);doc.text("Partido",30,y);
+      ranked.forEach((p,i)=>doc.text((p.apodo||p.nombre).slice(0,9),tStart+i*colW,y));
+      doc.line(14,y+2,295,y+2);y+=7;
+    }
+    if(m.f!==lastFecha){
+      if(lastFecha!==""){y+=1;doc.setDrawColor(180);doc.line(14,y,295,y);doc.setDrawColor(0);y+=3;}
+      doc.setFont("helvetica","bold");doc.setFontSize(7);doc.setTextColor(80,80,80);
+      doc.text(m.f,14,y);doc.setTextColor(0,0,0);y+=5;lastFecha=m.f;
+    }
+    doc.setFont("helvetica","normal");doc.setFontSize(7);
+    doc.text(m.hr,14,y);
+    doc.text((m.h+" vs "+m.a).slice(0,24),30,y);
+    ranked.forEach((p,i)=>{
+      const pron=(state.pronosticos[p.id]||{})[m.id];
+      const label=pron==="1"?m.h.slice(0,7):pron==="x"?"EMP":pron==="2"?m.a.slice(0,7):"—";
+      if(!pron)doc.setTextColor(180,180,180);
+      doc.text(label,tStart+i*colW,y);
+      doc.setTextColor(0,0,0);
+    });
+    y+=5;
+  });
+  y+=4;doc.line(14,y,295,y);y+=5;
+  doc.setFont("helvetica","italic");doc.setFontSize(7);doc.setTextColor(100,100,100);
+  doc.text("Documento de transparencia — La Gran Polla Mundialista de Gus — Pronósticos inmutables.",148,y,{align:"center"});
+  doc.setTextColor(0,0,0);
+  doc.save("pronosticos_GENERAL_todos.pdf");
 }
 document.querySelectorAll(".nav-item").forEach(btn=>{
   btn.addEventListener("click",()=>{
@@ -903,8 +954,21 @@ document.getElementById("inp-pin").addEventListener("keydown",e=>{
 document.getElementById("btn-toggle-lock").addEventListener("click",async()=>{
   const newLocked=!state.locked;
   await fbSet("locked",newLocked);
-  if(newLocked&&Object.keys(state.participants).length>0)setTimeout(()=>construirExcel(),400);
+  if(newLocked&&Object.keys(state.participants).length>0){
+    setTimeout(()=>{
+      // 1. PDF general de todos
+      pdfGeneral();
+      // 2. PDF individual por cada participante
+      const list=Object.values(state.participants);
+      list.forEach((p,i)=>{
+        setTimeout(()=>pdfIndividual(p.id),600+(i*400));
+      });
+      // 3. Excel Plan B al final
+      setTimeout(()=>generarExcelPlanB(),600+list.length*400+600);
+    },500);
+  }
 });
+
 document.getElementById("btn-logout").addEventListener("click",()=>{adminLogged=false;renderAdmin();});
 
 document.getElementById("btn-reset-confirm").addEventListener("click",async()=>{
@@ -933,77 +997,72 @@ function generarExcelPlanB(){
 function construirExcel(){
   const wb=XLSX.utils.book_new();
   const ranked=getRanked();
+
+  // HOJA 1: PRONÓSTICOS (solo los pronósticos, sin resultados ni puntos)
   const h1=[["#","Fecha","Hora COL","Grupo","Local","Visitante",...ranked.map(p=>p.apodo||p.nombre)]];
   MATCHES.forEach((m,i)=>{
     const row=[i+1,m.f,m.hr,"Grupo "+m.g,m.h,m.a];
     ranked.forEach(p=>{
       const pron=(state.pronosticos[p.id]||{})[m.id];
-      row.push(pron==="1"?m.h:pron==="x"?"Empate":pron==="2"?m.a:"—");
+      row.push(pron==="1"?m.h:pron==="x"?"Empate":pron==="2"?m.a:"SIN PRONÓSTICO");
     });
     h1.push(row);
   });
   const ws1=XLSX.utils.aoa_to_sheet(h1);
-  ws1["!cols"]=[{wch:4},{wch:13},{wch:10},{wch:8},{wch:18},{wch:18},...ranked.map(()=>({wch:14}))];
+  ws1["!cols"]=[{wch:4},{wch:13},{wch:10},{wch:8},{wch:18},{wch:18},...ranked.map(()=>({wch:16}))];
   XLSX.utils.book_append_sheet(wb,ws1,"Pronósticos");
+
+  // HOJA 2: RESULTADOS — admin ingresa manualmente
   const h2=[
-    ["#","Fecha","Hora COL","Grupo","Local","Visitante","RESULTADO — escribe el equipo ganador o Empate"],
-    ["","","","","","","↑ Escribe el nombre EXACTO del equipo ganador, o la palabra Empate"]
+    ["LA GRAN POLLA MUNDIALISTA DE GUS — HOJA DE RESULTADOS"],
+    ["Instrucciones: En la columna RESULTADO escribe el nombre EXACTO del equipo ganador, o la palabra Empate"],
+    [],
+    ["#","Fecha","Hora COL","Grupo","Local","Visitante","RESULTADO (llenar manualmente)"]
   ];
   MATCHES.forEach((m,i)=>{
-    const res=state.resultados[m.id];
-    const resLabel=res==="1"?m.h:res==="x"?"Empate":res==="2"?m.a:"";
-    h2.push([i+1,m.f,m.hr,"Grupo "+m.g,m.h,m.a,resLabel]);
+    h2.push([i+1,m.f,m.hr,"Grupo "+m.g,m.h,m.a,""]);
   });
   const ws2=XLSX.utils.aoa_to_sheet(h2);
   ws2["!cols"]=[{wch:4},{wch:13},{wch:10},{wch:8},{wch:18},{wch:18},{wch:42}];
   XLSX.utils.book_append_sheet(wb,ws2,"Resultados");
-  const h3=[["Posición","Participante","Nombre real","Celular","Puntos","% Acierto"]];
-  ranked.forEach((p,i)=>{
-    const pct=MATCHES.length>0?(p.pts/MATCHES.length*100).toFixed(1)+"%":"0%";
-    h3.push([i===0?"🥇 1ro":String(i+1),p.apodo||p.nombre,p.nombre,p.celular?"+"+p.celular:"—",p.pts,pct]);
-  });
-  h3.push([]);
-  h3.push(["DETALLE: ✓=acertó (+1 pto)  ✗=falló  —=sin pronóstico"]);
-  h3.push([]);
-  h3.push(["#","Fecha","Partido",...ranked.map(p=>p.apodo||p.nombre)]);
-  MATCHES.forEach((m,i)=>{
-    const res=state.resultados[m.id];
-    const resLabel=res==="1"?m.h:res==="x"?"Empate":res==="2"?m.a:"";
-    const row=[i+1,m.f,m.h+" vs "+m.a+(resLabel?" → "+resLabel:"")];
-    ranked.forEach(p=>{
-      const pron=(state.pronosticos[p.id]||{})[m.id];
-      const pronLabel=pron==="1"?m.h:pron==="x"?"Empate":pron==="2"?m.a:"—";
-      let cell=pronLabel;
-      if(res&&pron)cell=pron===res?"✓ "+pronLabel:"✗ "+pronLabel;
-      row.push(pron?cell:"—");
-    });
-    h3.push(row);
+
+  // HOJA 3: PARTICIPANTES
+  const h3=[["Participante","Nombre real","Celular"]];
+  ranked.forEach(p=>{
+    h3.push([p.apodo||p.nombre,p.nombre,p.celular?"+"+p.celular:"—"]);
   });
   const ws3=XLSX.utils.aoa_to_sheet(h3);
-  ws3["!cols"]=[{wch:10},{wch:13},{wch:28},...ranked.map(()=>({wch:16}))];
-  XLSX.utils.book_append_sheet(wb,ws3,"Posiciones");
+  ws3["!cols"]=[{wch:20},{wch:28},{wch:18}];
+  XLSX.utils.book_append_sheet(wb,ws3,"Participantes");
+
+  // HOJA 4: INSTRUCCIONES
   const h4=[
-    ["LA GRAN POLLA MUNDIALISTA DE GUS — PLAN B"],
+    ["LA GRAN POLLA MUNDIALISTA DE GUS — PLAN B (RESPALDO MANUAL)"],
     ["Generado: "+new Date().toLocaleString("es-CO")],
     [],
     ["INSTRUCCIONES"],
     [],
-    ["📋 Hoja Pronósticos:","Todos los pronósticos de cada participante. Solo lectura."],
+    ["📋 Hoja Pronósticos:","Todos los pronósticos de cada participante al momento del cierre."],
+    ["","Solo lectura — no modificar."],
     [],
-    ["📝 Hoja Resultados:","Ingresa el resultado de cada partido en la columna RESULTADO."],
-    ["","Escribe el nombre EXACTO del equipo ganador tal como aparece en Local o Visitante."],
-    ["","Si terminó en empate escribe: Empate"],
+    ["📝 Hoja Resultados:","Aquí el admin ingresa manualmente el resultado de cada partido."],
+    ["","Escribe el nombre EXACTO del equipo ganador en la columna RESULTADO."],
+    ["","Si el partido terminó en empate, escribe la palabra: Empate"],
+    ["","Ejemplo: México vs Sudáfrica terminó 2-1 → escribe en la celda: México"],
+    ["","Ejemplo: terminó 1-1 → escribe: Empate"],
     [],
-    ["🏆 Hoja Posiciones:","Ranking con puntos calculados al momento de descargar el Excel."],
-    ["","✓ = pronóstico correcto (+1 punto)"],
-    ["","✗ = pronóstico incorrecto (0 puntos)"],
-    ["","— = el participante no ingresó pronóstico"],
+    ["⚠️ IMPORTANTE:","Este Excel NO calcula puntos automáticamente."],
+    ["","Los puntos deben calcularse manualmente comparando"],
+    ["","la columna RESULTADO (Hoja 2) con los pronósticos (Hoja 1)."],
     [],
-    ["⚠️ Nota:","Este Excel es independiente de la app. Los datos NO se sincronizan con Firebase."],
+    ["👥 Hoja Participantes:","Lista de todos los participantes con su celular."],
+    [],
+    ["📌 Nota:","Este archivo es el respaldo offline. Los datos son independientes de la app."],
   ];
   const ws4=XLSX.utils.aoa_to_sheet(h4);
-  ws4["!cols"]=[{wch:22},{wch:75}];
+  ws4["!cols"]=[{wch:22},{wch:80}];
   XLSX.utils.book_append_sheet(wb,ws4,"Instrucciones");
+
   XLSX.writeFile(wb,"PlanB_PollaMundialista_"+new Date().toISOString().slice(0,10)+".xlsx");
 }
 </script>
