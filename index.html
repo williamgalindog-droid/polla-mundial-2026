@@ -138,6 +138,9 @@ input:focus,select:focus{border-color:var(--accent)}
 </div>
 <div class="main">
   <div class="section active" id="sec-registro">
+    <div style="width:100%;border-radius:var(--r-lg);overflow:hidden;margin-bottom:14px;max-height:320px">
+      <img src="mundial_2026_vertical.jpg" alt="FIFA World Cup 2026" style="width:100%;display:block;object-fit:cover;object-position:center top;max-height:320px">
+    </div>
     <div class="page-hero">Regístrate</div>
     <div class="page-sub">Ingresa tus datos para participar</div>
     <div class="countdown-box">
@@ -290,7 +293,7 @@ input:focus,select:focus{border-color:var(--accent)}
       </div>
       <div class="card">
         <div class="card-title">Plan B — Respaldo Excel con fórmulas</div>
-        <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Descarga el Excel de respaldo. Incluye fórmulas que calculan puntos y ranking automáticamente cuando ingreses los resultados.</p>
+        <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Descarga el Excel de respaldo. Incluye fórmulas que calculan puntos y ranking automáticamente.</p>
         <button class="btn-ghost" id="btn-plan-b" style="border-color:rgba(74,222,128,0.3);color:var(--success)">📊 Descargar Excel Plan B</button>
       </div>
       <div class="card">
@@ -731,8 +734,7 @@ function pdfIndividual(pid){
   doc.text("Pronósticos al cierre — "+new Date().toLocaleString("es-CO"),105,36,{align:"center"});
   doc.setFontSize(9);doc.setTextColor(120,120,120);
   doc.text("Este documento certifica los pronósticos ingresados antes del inicio del torneo.",105,43,{align:"center"});
-  doc.setTextColor(0,0,0);
-  doc.line(14,47,196,47);
+  doc.setTextColor(0,0,0);doc.line(14,47,196,47);
   let y=57;
   doc.setFont("helvetica","bold");doc.setFontSize(11);
   doc.text("#",14,y);doc.text("Fecha / Hora",24,y);doc.text("Partido",72,y);doc.text("Pronóstico",152,y);
@@ -790,8 +792,7 @@ function pdfGeneral(){
   doc.text("Este documento certifica los pronósticos de todos los participantes antes del inicio del torneo.",148,27,{align:"center"});
   doc.setTextColor(0,0,0);
   const colW=Math.min(20,Math.floor(215/Math.max(ranked.length,1)));
-  const tStart=72;
-  let y=36;
+  const tStart=72;let y=36;
   doc.setFont("helvetica","bold");doc.setFontSize(7);
   doc.text("Hora",14,y);doc.text("Partido",30,y);
   ranked.forEach((p,i)=>doc.text((p.apodo||p.nombre).slice(0,9),tStart+i*colW,y));
@@ -1008,9 +1009,7 @@ function construirExcel(){
   ws1["!cols"]=[{wch:4},{wch:13},{wch:10},{wch:8},{wch:18},{wch:18},...ranked.map(()=>({wch:16}))];
   XLSX.utils.book_append_sheet(wb,ws1,"Pronósticos");
 
-  // HOJA 2: RESULTADOS — admin llena col G, fórmulas calculan puntos
-  // Fila 1=título, Fila 2=instrucción, Fila 3=vacía, Fila 4=encabezado
-  // Datos: filas 5 a 5+N-1 | Totales: fila 5+N
+  // HOJA 2: RESULTADOS con fórmulas automáticas
   const enc2=["#","Fecha","Hora COL","Grupo","Local","Visitante","RESULTADO (llenar aquí)"];
   ranked.forEach(p=>enc2.push("Pts: "+(p.apodo||p.nombre)));
   const h2data=[
@@ -1039,7 +1038,7 @@ function construirExcel(){
   ws2["!cols"]=[{wch:4},{wch:13},{wch:10},{wch:8},{wch:18},{wch:18},{wch:30},...ranked.map(()=>({wch:14}))];
   XLSX.utils.book_append_sheet(wb,ws2,"Resultados");
 
-  // HOJA 3: POSICIONES — ranking automático con RANK()
+  // HOJA 3: POSICIONES con RANK() automático
   const totalRowExcel=5+N;
   const lastPtCol=P>0?String.fromCharCode(72+P-1):"H";
   const h3=[
@@ -1069,27 +1068,24 @@ function construirExcel(){
     [],
     ["INSTRUCCIONES DE USO"],
     [],
-    ["PASO 1 — Hoja Pronósticos:","Solo lectura. Muestra los pronósticos de cada participante."],
-    ["","NO modificar esta hoja o las fórmulas dejarán de funcionar."],
+    ["PASO 1 — Hoja Pronósticos:","Solo lectura. NO modificar o las fórmulas dejarán de funcionar."],
     [],
     ["PASO 2 — Hoja Resultados:","Ingresa el resultado de cada partido en la columna G."],
-    ["","Escribe el nombre EXACTO del equipo ganador como aparece en columna E o F."],
+    ["","Escribe el nombre EXACTO del equipo ganador (como aparece en col E o F)."],
     ["","Si terminó empatado escribe: Empate"],
-    ["","Ej: México vs Sudáfrica terminó 2-1 → escribe en col G: México"],
-    ["","Ej: terminó 1-1 → escribe: Empate"],
-    ["","Los puntos de cada participante se calculan AUTOMÁTICAMENTE."],
+    ["","Ej: México vs Sudáfrica terminó 2-1 → escribe: México"],
+    ["","Los puntos se calculan AUTOMÁTICAMENTE con fórmulas."],
     [],
     ["PASO 3 — Hoja Posiciones:","El ranking se actualiza automáticamente con fórmula RANK()."],
     [],
-    ["REGLAS:","1 punto por cada pronóstico correcto. 0 si falla o no ingresó."],
+    ["REGLAS:","1 punto por pronóstico correcto. 0 si falla o no ingresó."],
     ["","El nombre debe coincidir EXACTAMENTE (mayúsculas, tildes, espacios)."],
     [],
-    ["⚠️ IMPORTANTE:","Este Excel es independiente de la app. No se sincroniza con Firebase."],
+    ["⚠️ NOTA:","Este Excel es independiente de la app. No se sincroniza con Firebase."],
   ];
   const ws4=XLSX.utils.aoa_to_sheet(h4);
   ws4["!cols"]=[{wch:25},{wch:80}];
   XLSX.utils.book_append_sheet(wb,ws4,"Instrucciones");
-
   XLSX.writeFile(wb,"PlanB_PollaMundialista_"+new Date().toISOString().slice(0,10)+".xlsx");
 }
 </script>
