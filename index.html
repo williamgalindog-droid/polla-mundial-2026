@@ -146,8 +146,6 @@ input:focus,select:focus{border-color:var(--accent)}
       <div class="countdown-lbl">Primer partido: 11 jun 2026 · 5:00 PM Colombia</div>
     </div>
     <div id="locked-reg" class="lock-banner" style="display:none">🔒 El torneo ya inició. No se aceptan nuevos participantes.</div>
-
-    <!-- PASO 1 -->
     <div id="reg-form">
       <div class="card" style="border-color:rgba(200,241,53,0.3)">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
@@ -178,8 +176,6 @@ input:focus,select:focus{border-color:var(--accent)}
         <button class="btn" id="btn-registrar">REGISTRARME</button>
       </div>
     </div>
-
-    <!-- PASO 2 -->
     <div class="card" style="margin-top:4px;border-color:rgba(96,165,250,0.3)">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
         <div style="width:32px;height:32px;border-radius:50%;background:#60a5fa;color:#0d0d0d;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:18px;flex-shrink:0">2</div>
@@ -206,7 +202,6 @@ input:focus,select:focus{border-color:var(--accent)}
       <div id="login-alert" class="alert alert-red" style="display:none"></div>
       <button class="btn-ghost" id="btn-login" style="margin-top:4px;border-color:rgba(96,165,250,0.4);color:#60a5fa">INGRESAR CON CÓDIGO</button>
     </div>
-
     <div class="card">
       <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
         <span>Participantes</span><span id="count-badge" class="badge badge-accent">0/100</span>
@@ -266,8 +261,7 @@ input:focus,select:focus{border-color:var(--accent)}
       <div class="stat-box"><div class="stat-val" id="st-pen">72</div><div class="stat-lbl">por jugar</div></div>
     </div>
     <div class="pdf-row">
-      <button class="pdf-btn" id="btn-pdf-pos">📄 Posiciones PDF</button>
-      <button class="pdf-btn" id="btn-pdf-prons">📋 Pronósticos PDF</button>
+      <button class="pdf-btn" id="btn-pdf-prons">📋 Mis pronósticos PDF</button>
     </div>
     <div class="card"><div id="tabla-posiciones"><p style="color:var(--text3);font-size:13px;text-align:center;padding:16px 0">Aún no hay datos.</p></div></div>
   </div>
@@ -419,14 +413,12 @@ let paisCode="57",paisCodeLogin="57";
 
 function selPais(btn){
   document.querySelectorAll(".pais-btn").forEach(b=>b.classList.remove("active"));
-  btn.classList.add("active");
-  paisCode=btn.dataset.code;
+  btn.classList.add("active");paisCode=btn.dataset.code;
   document.getElementById("pais-prefix").textContent="+"+paisCode;
 }
 function selPaisLogin(btn){
   document.querySelectorAll(".pais-btn-login").forEach(b=>b.classList.remove("active"));
-  btn.classList.add("active");
-  paisCodeLogin=btn.dataset.code;
+  btn.classList.add("active");paisCodeLogin=btn.dataset.code;
   document.getElementById("login-prefix").textContent="+"+paisCodeLogin;
 }
 
@@ -724,74 +716,66 @@ function updateCountdown(){
 setInterval(updateCountdown,1000);
 updateCountdown();
 
-function pdfPosiciones(){
+function pdfPronosticos(){
+  if(!currentPid){alert("Debes ingresar con tu código para descargar tus pronósticos.");return;}
+  const p=state.participants[currentPid];
+  if(!p)return;
+  const nombre=p.apodo||p.nombre;
   const doc=new jspdf.jsPDF();
   doc.setFontSize(16);doc.setFont("helvetica","bold");
-  doc.text("La Gran Polla Mundialista de Gus",105,18,{align:"center"});
-  doc.setFontSize(10);doc.setFont("helvetica","normal");
-  doc.text("Generado: "+new Date().toLocaleString("es-CO"),105,26,{align:"center"});
-  doc.line(14,30,196,30);
-  const ranked=getRanked();let y=40;
-  doc.setFont("helvetica","bold");doc.setFontSize(9);
-  doc.text("#",16,y);doc.text("Participante",28,y);doc.text("Apodo",100,y);doc.text("Celular",145,y);doc.text("Pts",185,y,{align:"right"});
-  doc.line(14,y+3,196,y+3);y+=10;
-  doc.setFont("helvetica","normal");
-  ranked.forEach((p,i)=>{
-    if(y>280){doc.addPage();y=20;}
-    doc.text(i===0?"*** 1ro ***":String(i+1),16,y);
-    doc.text(p.nombre.slice(0,35),28,y);
-    doc.text((p.apodo||"-").slice(0,25),100,y);
-    doc.text((p.celular?"+"+p.celular:"-").slice(0,18),145,y);
-    doc.text(String(p.pts),185,y,{align:"right"});
-    y+=7;
-  });
-  doc.save("posiciones_polla_gus.pdf");
-}
-
-function pdfPronosticos(){
-  const doc=new jspdf.jsPDF("landscape");
-  const ranked=getRanked();
-  const colW=Math.min(16,Math.floor(175/Math.max(ranked.length,1)));
-  const tStart=105;
-  doc.setFontSize(13);doc.setFont("helvetica","bold");
-  doc.text("La Gran Polla Mundialista de Gus — Pronósticos",148,12,{align:"center"});
-  doc.setFontSize(7);doc.setFont("helvetica","normal");
-  doc.text("Generado: "+new Date().toLocaleString("es-CO")+" | ?=Sin pronóstico  ✓=Acertó  ✗=Falló",148,18,{align:"center"});
-  doc.setFontSize(6);doc.setFont("helvetica","bold");
-  doc.text("Hora",14,25);doc.text("Partido",32,25);
-  ranked.forEach((p,i)=>doc.text((p.apodo||p.nombre).slice(0,7),tStart+i*colW,25));
-  doc.line(14,27,290,27);
-  let y=33;let lastFecha="";
+  doc.text("La Gran Polla Mundialista de Gus",105,16,{align:"center"});
+  doc.setFontSize(11);doc.setFont("helvetica","normal");
+  doc.text("Pronósticos de: "+nombre,105,24,{align:"center"});
+  doc.setFontSize(8);
+  doc.text("Generado: "+new Date().toLocaleString("es-CO"),105,30,{align:"center"});
+  doc.line(14,34,196,34);
+  let y=42;
+  doc.setFont("helvetica","bold");doc.setFontSize(8);
+  doc.text("#",14,y);doc.text("Hora",22,y);doc.text("Partido",38,y);
+  doc.text("Tu pronóstico",120,y);doc.text("Resultado",155,y);doc.text("Pts",188,y);
+  doc.line(14,y+2,196,y+2);y+=8;
+  doc.setFont("helvetica","normal");doc.setFontSize(8);
+  let totalPts=0;let lastFecha="";let num=0;
   MATCHES.forEach(m=>{
-    if(y>198){
-      doc.addPage("landscape");y=15;
-      doc.setFontSize(6);doc.setFont("helvetica","bold");
-      doc.text("Hora",14,y);doc.text("Partido",32,y);
-      ranked.forEach((p,i)=>doc.text((p.apodo||p.nombre).slice(0,7),tStart+i*colW,y));
-      doc.line(14,y+2,290,y+2);y+=8;
+    num++;
+    if(y>275){
+      doc.addPage();y=20;
+      doc.setFont("helvetica","bold");doc.setFontSize(8);
+      doc.text("#",14,y);doc.text("Hora",22,y);doc.text("Partido",38,y);
+      doc.text("Tu pronóstico",120,y);doc.text("Resultado",155,y);doc.text("Pts",188,y);
+      doc.line(14,y+2,196,y+2);y+=8;doc.setFont("helvetica","normal");
     }
     if(m.f!==lastFecha){
-      if(lastFecha!==""){y+=2;doc.setDrawColor(180);doc.line(14,y,290,y);doc.setDrawColor(0);y+=4;}
+      if(lastFecha!=="")y+=1;
       doc.setFont("helvetica","bold");doc.setFontSize(7);
       doc.text(m.f,14,y);y+=5;
+      doc.setFont("helvetica","normal");doc.setFontSize(8);
       lastFecha=m.f;
     }
-    doc.setFont("helvetica","normal");doc.setFontSize(6);
-    doc.text(m.hr,14,y);
-    doc.text((m.h+" vs "+m.a).slice(0,35),32,y);
+    const pron=(state.pronosticos[currentPid]||{})[m.id];
     const res=state.resultados[m.id];
-    ranked.forEach((p,i)=>{
-      const pron=(state.pronosticos[p.id]||{})[m.id];
-      let label="?";
-      if(pron){
-        if(res){label=pron===res?"✓":"✗";}
-        else{label=pron==="1"?m.h.slice(0,4):pron==="x"?"EMP":m.a.slice(0,4);}
-      }
-      doc.text(label,tStart+i*colW,y);
-    });
-    y+=5;
+    const pronLabel=pron==="1"?m.h:pron==="x"?"Empate":pron==="2"?m.a:"—";
+    const resLabel=res==="1"?m.h:res==="x"?"Empate":res==="2"?m.a:"Pendiente";
+    const correct=res&&pron&&pron===res;
+    const wrong=res&&pron&&pron!==res;
+    if(correct)totalPts++;
+    doc.text(String(num),14,y);
+    doc.text(m.hr,22,y);
+    doc.text((m.h+" vs "+m.a).slice(0,28),38,y);
+    doc.text(pronLabel.slice(0,18),120,y);
+    doc.text(resLabel.slice(0,18),155,y);
+    if(correct){doc.setTextColor(74,222,128);doc.text("+1 ✓",188,y);doc.setTextColor(0,0,0);}
+    else if(wrong){doc.setTextColor(255,77,77);doc.text("0 ✗",188,y);doc.setTextColor(0,0,0);}
+    else{doc.text(res?"0":"—",188,y);}
+    y+=6;
   });
-  doc.save("pronosticos_polla_gus.pdf");
+  y+=4;doc.line(14,y,196,y);y+=7;
+  doc.setFont("helvetica","bold");doc.setFontSize(11);
+  doc.text("TOTAL: "+totalPts+" puntos de "+MATCHES.length+" partidos",105,y,{align:"center"});
+  y+=7;doc.setFont("helvetica","normal");doc.setFontSize(9);
+  doc.text("Porcentaje de acierto: "+Math.round(totalPts/MATCHES.length*100)+"%",105,y,{align:"center"});
+  const safeName=nombre.replace(/[^a-zA-Z0-9]/g,"_");
+  doc.save("mis_pronosticos_"+safeName+".pdf");
 }
 document.querySelectorAll(".nav-item").forEach(btn=>{
   btn.addEventListener("click",()=>{
@@ -919,23 +903,19 @@ document.getElementById("inp-pin").addEventListener("keydown",e=>{
 document.getElementById("btn-toggle-lock").addEventListener("click",async()=>{
   const newLocked=!state.locked;
   await fbSet("locked",newLocked);
-  if(newLocked&&Object.keys(state.participants).length>0)setTimeout(()=>pdfPronosticos(),400);
+  if(newLocked&&Object.keys(state.participants).length>0)setTimeout(()=>construirExcel(),400);
 });
 document.getElementById("btn-logout").addEventListener("click",()=>{adminLogged=false;renderAdmin();});
 
 document.getElementById("btn-reset-confirm").addEventListener("click",async()=>{
   if(!confirm("⚠️ ¿Borrar TODO? Participantes, pronósticos y resultados. Esta acción NO se puede deshacer."))return;
   const pinConfirm=prompt("Por seguridad, ingresa el PIN de administrador para confirmar:");
-  if(pinConfirm!==ADMIN_PIN){
-    alert("PIN incorrecto. Reinicio cancelado.");
-    return;
-  }
+  if(pinConfirm!==ADMIN_PIN){alert("PIN incorrecto. Reinicio cancelado.");return;}
   currentPid=null;
   await db.ref("polla").set({locked:false,participants:{},pronosticos:{},resultados:{},timestamps:{},codigos:{}});
   alert("✅ Todo reiniciado correctamente.");
 });
 
-document.getElementById("btn-pdf-pos").addEventListener("click",pdfPosiciones);
 document.getElementById("btn-pdf-prons").addEventListener("click",pdfPronosticos);
 document.getElementById("btn-plan-b").addEventListener("click",generarExcelPlanB);
 
@@ -965,7 +945,6 @@ function construirExcel(){
   const ws1=XLSX.utils.aoa_to_sheet(h1);
   ws1["!cols"]=[{wch:4},{wch:13},{wch:10},{wch:8},{wch:18},{wch:18},...ranked.map(()=>({wch:14}))];
   XLSX.utils.book_append_sheet(wb,ws1,"Pronósticos");
-
   const h2=[
     ["#","Fecha","Hora COL","Grupo","Local","Visitante","RESULTADO — escribe el equipo ganador o Empate"],
     ["","","","","","","↑ Escribe el nombre EXACTO del equipo ganador, o la palabra Empate"]
@@ -978,14 +957,13 @@ function construirExcel(){
   const ws2=XLSX.utils.aoa_to_sheet(h2);
   ws2["!cols"]=[{wch:4},{wch:13},{wch:10},{wch:8},{wch:18},{wch:18},{wch:42}];
   XLSX.utils.book_append_sheet(wb,ws2,"Resultados");
-
   const h3=[["Posición","Participante","Nombre real","Celular","Puntos","% Acierto"]];
   ranked.forEach((p,i)=>{
     const pct=MATCHES.length>0?(p.pts/MATCHES.length*100).toFixed(1)+"%":"0%";
     h3.push([i===0?"🥇 1ro":String(i+1),p.apodo||p.nombre,p.nombre,p.celular?"+"+p.celular:"—",p.pts,pct]);
   });
   h3.push([]);
-  h3.push(["DETALLE: ✓=acertó (+1 pto)  ✗=falló  —=sin pronóstico  (vacío)=pendiente"]);
+  h3.push(["DETALLE: ✓=acertó (+1 pto)  ✗=falló  —=sin pronóstico"]);
   h3.push([]);
   h3.push(["#","Fecha","Partido",...ranked.map(p=>p.apodo||p.nombre)]);
   MATCHES.forEach((m,i)=>{
@@ -1004,7 +982,6 @@ function construirExcel(){
   const ws3=XLSX.utils.aoa_to_sheet(h3);
   ws3["!cols"]=[{wch:10},{wch:13},{wch:28},...ranked.map(()=>({wch:16}))];
   XLSX.utils.book_append_sheet(wb,ws3,"Posiciones");
-
   const h4=[
     ["LA GRAN POLLA MUNDIALISTA DE GUS — PLAN B"],
     ["Generado: "+new Date().toLocaleString("es-CO")],
@@ -1016,8 +993,6 @@ function construirExcel(){
     ["📝 Hoja Resultados:","Ingresa el resultado de cada partido en la columna RESULTADO."],
     ["","Escribe el nombre EXACTO del equipo ganador tal como aparece en Local o Visitante."],
     ["","Si terminó en empate escribe: Empate"],
-    ["","Ejemplo: México vs Sudáfrica terminó 2-1 → escribe: México"],
-    ["","Ejemplo: terminó 1-1 → escribe: Empate"],
     [],
     ["🏆 Hoja Posiciones:","Ranking con puntos calculados al momento de descargar el Excel."],
     ["","✓ = pronóstico correcto (+1 punto)"],
@@ -1025,7 +1000,6 @@ function construirExcel(){
     ["","— = el participante no ingresó pronóstico"],
     [],
     ["⚠️ Nota:","Este Excel es independiente de la app. Los datos NO se sincronizan con Firebase."],
-    ["","Si la app funciona, úsala. Este archivo es el plan de respaldo."],
   ];
   const ws4=XLSX.utils.aoa_to_sheet(h4);
   ws4["!cols"]=[{wch:22},{wch:75}];
