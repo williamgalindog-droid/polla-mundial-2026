@@ -816,7 +816,7 @@ function pdfGeneral(){
     doc.text((m.h+" vs "+m.a).slice(0,24),30,y);
     ranked.forEach((p,i)=>{
       const pron=(state.pronosticos[p.id]||{})[m.id];
-      const label=pron==="1"?m.h.slice(0,7):pron==="x"?"EMP":pron==="2"?m.a.slice(0,7):"—";
+      const label=pron==="1"?m.h.slice(0,9):pron==="x"?"EMP":pron==="2"?m.a.slice(0,9):"—";
       if(!pron)doc.setTextColor(180,180,180);
       doc.text(label,tStart+i*colW,y);
       doc.setTextColor(0,0,0);
