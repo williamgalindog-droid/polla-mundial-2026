@@ -616,15 +616,16 @@ function renderAdmin(){
   const lockBtn=document.getElementById("btn-toggle-lock");
   const lockStatus=document.getElementById("lock-status");
   if(state.locked){
-    lockBtn.textContent="🔓 Desbloquear pronósticos";
+    lockBtn.style.display="none";
     lockStatus.className="alert alert-red";
-    lockStatus.textContent="Pronósticos bloqueados. Nadie puede modificarlos.";
-  }else{
+    lockStatus.textContent="🔒 Pronósticos cerrados definitivamente.";
+}else{
+    lockBtn.style.display="block";
     lockBtn.textContent="🔒 Bloquear pronósticos";
     lockStatus.className="alert alert-success";
     lockStatus.textContent="Pronósticos abiertos. Los participantes pueden editar.";
-  }
-  lockStatus.style.display="block";
+}
+lockStatus.style.display="block";
   const list=participantList();
   const codEl=document.getElementById("admin-codigos");
   if(!list.length){codEl.innerHTML='<p style="color:var(--text3);font-size:13px;text-align:center;padding:8px 0">Sin participantes.</p>';}
