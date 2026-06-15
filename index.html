@@ -578,7 +578,7 @@ function renderPublico(){
           return`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:13px">
             <div><span style="font-weight:500">${p.apodo||p.nombre}</span>
             ${ts?`<span style="font-size:10px;color:var(--text3);margin-left:6px">${fmtTs(ts)}</span>`:""}</div>
-            <span style="font-weight:600;color:${color}">${pronLabel}${correct?" ✓":wrong?" ✗":""}</span>
+            <span style="font-weight:700;color:${color};font-size:15px">${pronLabel}${correct?" ✓":wrong?" ✗":""}</span>
           </div>`;
         }).join("")}
       </div>
