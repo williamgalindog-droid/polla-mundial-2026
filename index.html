@@ -597,8 +597,10 @@ function renderPosiciones(){
   if(!ranked.length){el.innerHTML='<p style="color:var(--text3);font-size:13px;text-align:center;padding:16px 0">Aún no hay participantes.</p>';return;}
   el.innerHTML=ranked.map((p,i)=>{
     const idx=list.findIndex(x=>x.id===p.id);
+    const maxPts=ranked[0].pts;
+    const esLider=p.pts===maxPts&&p.pts>0;
     return`<div class="rank-item">
-      <div class="rank-pos${i===0?" first":""}">${i===0?"🥇":i+1}</div>
+      <div class="rank-pos${esLider?" first":""}">${esLider?"🥇":i+1}</div>
       <div class="avatar ${avClass(idx)}" style="width:32px;height:32px;font-size:11px">${initials(p.nombre)}</div>
       <div class="rank-info">
         <div class="rank-name">${p.apodo||p.nombre}</div>
